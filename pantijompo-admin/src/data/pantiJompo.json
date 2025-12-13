@@ -1,0 +1,57 @@
+[
+  {
+    "id": "panti-1",
+    "name": "Panti Werdha Bahagia",
+    "location": "Bandung",
+    "walletAddress": "0x8ba1f109551bD432803012645Ac136ddd64DBA72",
+    "target": 15000000000,
+    "raisedMatic": 320,
+    "raisedUsdt": 4200
+  },
+  {
+    "id": "panti-2",
+    "name": "Rumah Lansia Harmoni",
+    "location": "Jakarta",
+    "walletAddress": "0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF",
+    "target": 20000000000,
+    "raisedMatic": 540,
+    "raisedUsdt": 7300
+  },
+  {
+    "id": "panti-3",
+    "name": "Panti Tresna Werdha Cinta Kasih",
+    "location": "Surabaya",
+    "walletAddress": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+    "target": 18000000000,
+    "raisedMatic": 410,
+    "raisedUsdt": 5200
+  },
+  {
+    "id": "panti-4",
+    "name": "Panti Jompo Kasih Ibu",
+    "location": "Yogyakarta",
+    "walletAddress": "0x4B0897b0513fdc7C541B6d9D7E929C4e5364D2dB",
+    "target": 12000000000,
+    "raisedMatic": 280,
+    "raisedUsdt": 3600
+  },
+  {
+    "id": "panti-5",
+    "name": "Rumah Bahagia Senja",
+    "location": "Makassar",
+    "walletAddress": "0x583031D1113aD414F02576BD6afaBfb302140225",
+    "target": 22000000000,
+    "raisedMatic": 610,
+    "raisedUsdt": 9100
+  },
+  {
+    "id": "panti-6",
+    "name": "Panti Pelita Hidup",
+    "location": "Semarang",
+    "walletAddress": "0xd1220A0cf47C7B9Be7A2E6BA89F429762e7b9aDb",
+    "target": 14000000000,
+    "raisedMatic": 310,
+    "raisedUsdt": 4100
+  }
+]
+

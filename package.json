@@ -1,0 +1,31 @@
+{
+  "name": "design-n-implementation",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.14",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.10",
+    "@types/react": "^18.3.27",
+    "@types/react-dom": "^18.3.7",
+    "ethers": "^6.15.0",
+    "lucide-react": "^0.554.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.6.0",
+    "viem": "^2.40.2",
+    "wagmi": "^3.0.1"
+  }
+}
