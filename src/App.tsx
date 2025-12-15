@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Plus, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 import { Header } from './components/Header'
@@ -6,10 +7,11 @@ import { Hero } from './components/Hero'
 import { HowItWorks } from './components/HowItWorks'
 import { FundraisersList } from './components/FundraisersList'
 import { DonationModal } from './components/DonationModal'
+import { CreateFundraiserForm } from './components/CreateFundraiserForm'
 import { Footer } from './components/Footer'
-import { initialFundraisers } from './data/fundraisers'
-import type { Fundraiser } from './types'
-import type { DonationToken } from './lib/constants'
+import type { FundraiserFromContract } from './types'
+import { useAccount } from 'wagmi'
+import { isContractDeployed } from './lib/constants'
 
 const aboutContent = [
   {
@@ -30,27 +32,40 @@ const aboutContent = [
 ]
 
 const App = () => {
-  const [fundraisers, setFundraisers] = useState(initialFundraisers)
-  const [selectedFundraiser, setSelectedFundraiser] = useState<Fundraiser | null>(null)
+  const { address } = useAccount()
+  const [selectedFundraiser, setSelectedFundraiser] = useState<FundraiserFromContract | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
 
-  const handleDonationSuccess = (
-    fundraiserId: string,
-    token: DonationToken,
-    amount: number,
-  ) => {
-    setFundraisers((prev) =>
-      prev.map((item) =>
-        item.id === fundraiserId
-          ? { ...item, raisedAmount: item.raisedAmount + amount }
-          : item,
-      ),
-    )
-    toast.success(`Terima kasih! Donasi ${amount} ${token} tercatat.`)
+  const handleDonationSuccess = () => {
+    // Refresh will be handled by the component
+    toast.success('Donasi berhasil!')
+  }
+
+  const handleCreateSuccess = () => {
+    toast.success('Fundraiser berhasil dibuat!')
+    setShowCreateForm(false)
+    // Force page refresh to show new fundraiser
+    setTimeout(() => {
+      window.location.reload()
+    }, 2000)
   }
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <Header />
+      {!isContractDeployed && (
+        <div className="bg-amber-500/20 border-b border-amber-500/50 text-amber-200 px-6 py-3">
+          <div className="mx-auto max-w-6xl flex items-center gap-3">
+            <AlertCircle size={20} />
+            <div className="flex-1">
+              <p className="font-semibold">Smart Contract Belum Dideploy</p>
+              <p className="text-sm text-amber-200/80">
+                Silakan deploy smart contract terlebih dahulu. Lihat DEPLOYMENT.md untuk instruksi.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <main>
         <Hero />
 
@@ -68,8 +83,19 @@ const App = () => {
 
         <HowItWorks />
 
+        <section className="mx-auto max-w-6xl px-6 py-8">
+          {address && (
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="flex items-center gap-2 rounded-full bg-brand-primary px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-dark"
+            >
+              <Plus size={18} />
+              Buat Fundraiser Baru
+            </button>
+          )}
+        </section>
+
         <FundraisersList
-          fundraisers={fundraisers}
           onSelect={(fundraiser) => setSelectedFundraiser(fundraiser)}
         />
       </main>
@@ -81,6 +107,13 @@ const App = () => {
           fundraiser={selectedFundraiser}
           onClose={() => setSelectedFundraiser(null)}
           onDonationSuccess={handleDonationSuccess}
+        />
+      )}
+
+      {showCreateForm && (
+        <CreateFundraiserForm
+          onClose={() => setShowCreateForm(false)}
+          onSuccess={handleCreateSuccess}
         />
       )}
     </div>

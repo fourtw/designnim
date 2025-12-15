@@ -1,21 +1,24 @@
 import { HeartHandshake } from 'lucide-react'
-import type { Fundraiser } from '../types'
+import { formatEther } from 'viem'
+import type { FundraiserFromContract } from '../types'
 
 type Props = {
-  fundraiser: Fundraiser
-  onSelect: (fundraiser: Fundraiser) => void
+  fundraiser: FundraiserFromContract
+  onSelect: (fundraiser: FundraiserFromContract) => void
 }
 
 export const FundraiserCard = ({ fundraiser, onSelect }: Props) => {
-  const progress = Math.min(
-    (fundraiser.raisedAmount / fundraiser.targetAmount) * 100,
-    100,
-  )
+  const raisedAmount = Number(formatEther(fundraiser.raisedAmount || BigInt(0)))
+  const targetAmount = Number(formatEther(fundraiser.targetAmount || BigInt(1)))
+  const progress = Math.min((raisedAmount / targetAmount) * 100, 100)
+
+  // Default image if not provided
+  const imageUrl = fundraiser.imageUrl || 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80&auto=format'
 
   return (
     <article className="rounded-3xl border border-white/10 bg-white text-slate-900 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl">
       <img
-        src={fundraiser.imageUrl}
+        src={imageUrl}
         alt={fundraiser.name}
         className="h-48 w-full rounded-t-3xl object-cover"
         loading="lazy"
@@ -27,17 +30,19 @@ export const FundraiserCard = ({ fundraiser, onSelect }: Props) => {
         <h4 className="mt-1 text-xl font-semibold text-slate-900">
           {fundraiser.name}
         </h4>
-        <p className="mt-2 text-sm text-slate-600">{fundraiser.description}</p>
-        <p className="mt-3 text-xs font-semibold text-brand-dark uppercase tracking-wide">
-          Fokus: {fundraiser.impactFocus}
+        <p className="mt-2 text-sm text-slate-600 line-clamp-2">
+          {fundraiser.description}
         </p>
+        {fundraiser.impactFocus && (
+          <p className="mt-3 text-xs font-semibold text-brand-dark uppercase tracking-wide">
+            Fokus: {fundraiser.impactFocus}
+          </p>
+        )}
 
         <div className="mt-4">
           <div className="flex justify-between text-xs font-semibold text-slate-500">
-            <span>{fundraiser.raisedAmount} terkumpul</span>
-            <span>
-              Target {fundraiser.targetAmount} {fundraiser.targetToken}
-            </span>
+            <span>{raisedAmount.toFixed(3)} MATIC terkumpul</span>
+            <span>Target {targetAmount.toFixed(3)} MATIC</span>
           </div>
           <div className="mt-2 h-3 rounded-full bg-slate-200">
             <div
@@ -49,10 +54,11 @@ export const FundraiserCard = ({ fundraiser, onSelect }: Props) => {
 
         <button
           onClick={() => onSelect(fundraiser)}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
+          disabled={!fundraiser.isActive}
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
           <HeartHandshake size={16} />
-          Lihat & Donasi
+          {fundraiser.isActive ? 'Lihat & Donasi' : 'Tidak Aktif'}
         </button>
       </div>
     </article>

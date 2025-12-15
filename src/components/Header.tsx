@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Wallet2, LogOut } from 'lucide-react'
+import { Wallet2, LogOut, RefreshCw } from 'lucide-react'
 import type { Connector } from 'wagmi'
+import { useSwitchChain } from 'wagmi'
+import toast from 'react-hot-toast'
 
 import { APP_NAME } from '../lib/constants'
 import { useWalletConnect } from '../hooks/useWalletConnect'
 import { WalletConnectModal } from './WalletConnectModal'
+import { activeChain } from '../lib/wagmi'
 
 export const Header = () => {
   const [walletModalOpen, setWalletModalOpen] = useState(false)
@@ -27,6 +30,8 @@ export const Header = () => {
     pendingConnectorId,
     connectError,
   } = useWalletConnect()
+  
+  const { switchChainAsync, isPending: isSwitchingChain } = useSwitchChain()
 
   useEffect(() => {
     if (address) {
@@ -108,9 +113,35 @@ export const Header = () => {
         </div>
       </div>
       {isWrongNetwork && (
-        <div className="bg-rose-600/80 text-white text-center text-sm py-1">
-          Wallet berada di jaringan lain. Silakan pindah ke Polygon{' '}
-          {chainName}.
+        <div className="bg-rose-600/80 text-white text-center text-sm py-2">
+          <div className="mx-auto max-w-6xl flex items-center justify-center gap-3 px-6">
+            <span>Wallet berada di jaringan lain. Silakan pindah ke {activeChain.name}.</span>
+            {switchChainAsync && (
+              <button
+                onClick={async () => {
+                  try {
+                    await switchChainAsync({ chainId: activeChain.id })
+                    toast.success('Berhasil pindah ke Polygon ' + activeChain.name)
+                  } catch (err: any) {
+                    if (err.code !== 4001) {
+                      toast.error('Gagal pindah network. Silakan pindah manual di MetaMask.')
+                    }
+                  }
+                }}
+                disabled={isSwitchingChain}
+                className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold hover:bg-white/30 transition disabled:opacity-50"
+              >
+                {isSwitchingChain ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    Memindahkan...
+                  </>
+                ) : (
+                  'Pindah ke ' + activeChain.name
+                )}
+              </button>
+            )}
+          </div>
         </div>
       )}
       {!address && !hasConnectors && (

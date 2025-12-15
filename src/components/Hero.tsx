@@ -17,7 +17,7 @@ export const Hero = () => (
         Audit on-chain
       </span>
       <span className="rounded-full border border-white/20 px-4 py-2">
-        Support MATIC & USDT
+        Support MATIC
       </span>
       <span className="rounded-full border border-white/20 px-4 py-2">
         Fokus lansia Indonesia

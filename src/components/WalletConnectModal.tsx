@@ -7,6 +7,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import type { Connector } from 'wagmi'
+import { activeChain } from '../lib/wagmi'
 
 type WalletConnectModalProps = {
   open: boolean
@@ -184,12 +185,55 @@ export const WalletConnectModal = ({
                       try {
                         const ethereum = (window as any).ethereum
                         if (ethereum) {
+                          // Request connection
                           await ethereum.request({ method: 'eth_requestAccounts' })
-                          window.location.reload()
+                          
+                          // Try to switch to correct network based on activeChain
+                          try {
+                            const chainIdHex = `0x${activeChain.id.toString(16)}`
+                            await ethereum.request({
+                              method: 'wallet_switchEthereumChain',
+                              params: [{ chainId: chainIdHex }],
+                            })
+                          } catch (switchErr: any) {
+                            // If network doesn't exist, add it
+                            if (switchErr.code === 4902) {
+                              const chainIdHex = `0x${activeChain.id.toString(16)}`
+                              const chainConfig: any = {
+                                chainId: chainIdHex,
+                                chainName: activeChain.name,
+                                nativeCurrency: {
+                                  name: activeChain.nativeCurrency.name,
+                                  symbol: activeChain.nativeCurrency.symbol,
+                                  decimals: activeChain.nativeCurrency.decimals,
+                                },
+                                rpcUrls: [activeChain.rpcUrls.default.http[0]],
+                              }
+                              
+                              // Add block explorer if available
+                              if (activeChain.blockExplorers?.default?.url) {
+                                chainConfig.blockExplorerUrls = [activeChain.blockExplorers.default.url]
+                              }
+                              
+                              await ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [chainConfig],
+                              })
+                            }
+                          }
+                          
+                          // Wait a bit then reload
+                          setTimeout(() => {
+                            window.location.reload()
+                          }, 1000)
                         }
-                      } catch (err) {
+                      } catch (err: any) {
                         console.error('Failed to connect MetaMask:', err)
-                        alert('Gagal connect MetaMask. Pastikan extension sudah unlock dan refresh halaman.')
+                        if (err.code === 4001) {
+                          alert('Koneksi ditolak. Silakan approve di MetaMask.')
+                        } else {
+                          alert('Gagal connect MetaMask. Pastikan extension sudah unlock dan refresh halaman.')
+                        }
                       }
                     }}
                     className="mt-3 w-full rounded-xl bg-primary/20 px-4 py-2 text-xs font-semibold text-primary transition hover:bg-primary/30"
