@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { XCircle, Plus } from 'lucide-react'
+import { XCircle, Plus, Copy, Check } from 'lucide-react'
 import { parseEther } from 'viem'
 import toast from 'react-hot-toast'
 import { useAccount } from 'wagmi'
@@ -34,17 +34,25 @@ export const CreateFundraiserForm = ({ onClose, onSuccess }: Props) => {
     location: '',
     description: '',
     targetAmount: '',
-    recipient: address || '',
+    recipient: '', // Don't default to owner address
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [warnings, setWarnings] = useState<Record<string, string>>({})
+  const [copiedAddress, setCopiedAddress] = useState(false)
 
-  // Update recipient when address changes (but don't reset other fields)
-  useEffect(() => {
-    if (address && !formData.recipient) {
-      setFormData((prev) => ({ ...prev, recipient: address }))
-    }
-  }, [address])
+  // Account #3 address (from Hardhat default accounts)
+  const ACCOUNT_3_ADDRESS = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC'
+
+  // Don't auto-fill recipient with owner address
+  // User must explicitly enter recipient address (should be Account #3)
+  
+  const copyAccount3Address = () => {
+    navigator.clipboard.writeText(ACCOUNT_3_ADDRESS)
+    setCopiedAddress(true)
+    toast.success('Alamat Account #3 berhasil di-copy!')
+    setTimeout(() => setCopiedAddress(false), 2000)
+  }
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -65,20 +73,39 @@ export const CreateFundraiserForm = ({ onClose, onSuccess }: Props) => {
       newErrors.recipient = 'Alamat wallet penerima tidak valid'
     }
 
+    // Check if recipient is the same as owner
+    if (address && formData.recipient.toLowerCase() === address.toLowerCase()) {
+      newErrors.recipient = 'Alamat penerima tidak boleh sama dengan alamat owner (wallet Anda)'
+    }
+
     setErrors(newErrors)
+    
+    // Set warnings
+    const newWarnings: Record<string, string> = {}
+    if (address && formData.recipient && formData.recipient.toLowerCase() === address.toLowerCase()) {
+      newWarnings.recipient = '⚠️ Peringatan: Alamat penerima sama dengan owner. Dana akan kembali ke wallet Anda, bukan ke panti jompo!'
+    }
+    setWarnings(newWarnings)
+    
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validate()) {
-      toast.error('Mohon lengkapi semua field dengan benar')
+    if (!address) {
+      toast.error('Silakan hubungkan wallet terlebih dahulu')
       return
     }
 
-    if (!address) {
-      toast.error('Silakan hubungkan wallet terlebih dahulu')
+    // Final check: prevent owner = recipient
+    if (formData.recipient.toLowerCase() === address.toLowerCase()) {
+      toast.error('Alamat penerima tidak boleh sama dengan wallet owner Anda! Gunakan alamat Account #3 sebagai penerima.', { duration: 6000 })
+      return
+    }
+
+    if (!validate()) {
+      toast.error('Mohon lengkapi semua field dengan benar')
       return
     }
 
@@ -346,6 +373,23 @@ export const CreateFundraiserForm = ({ onClose, onSuccess }: Props) => {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">
               Alamat Wallet Penerima <span className="text-red-500">*</span>
+              <button
+                type="button"
+                onClick={copyAccount3Address}
+                className="ml-2 inline-flex items-center gap-1 text-xs text-brand-primary hover:text-brand-dark font-normal"
+              >
+                {copiedAddress ? (
+                  <>
+                    <Check size={12} />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={12} />
+                    <span>Copy Account #3</span>
+                  </>
+                )}
+              </button>
             </label>
             <input
               type="text"
@@ -355,8 +399,24 @@ export const CreateFundraiserForm = ({ onClose, onSuccess }: Props) => {
               onChange={(e) => {
                 const newValue = e.target.value
                 setFormData((prev) => ({ ...prev, recipient: newValue }))
+                
+                // Clear errors
                 if (errors.recipient) {
                   setErrors((prev) => ({ ...prev, recipient: '' }))
+                }
+                
+                // Real-time warning if recipient = owner
+                if (address && newValue.toLowerCase() === address.toLowerCase()) {
+                  setWarnings((prev) => ({
+                    ...prev,
+                    recipient: '⚠️ Peringatan: Alamat penerima sama dengan owner. Dana akan kembali ke wallet Anda, bukan ke panti jompo!'
+                  }))
+                } else {
+                  setWarnings((prev) => {
+                    const newWarnings = { ...prev }
+                    delete newWarnings.recipient
+                    return newWarnings
+                  })
                 }
               }}
               placeholder="0x..."
@@ -377,6 +437,12 @@ export const CreateFundraiserForm = ({ onClose, onSuccess }: Props) => {
             {errors.recipient && (
               <p className="mt-1 text-xs text-red-500">{errors.recipient}</p>
             )}
+            {warnings.recipient && !errors.recipient && (
+              <p className="mt-1 text-xs text-amber-600 font-semibold">{warnings.recipient}</p>
+            )}
+            <p className="mt-1 text-xs text-slate-500">
+              💡 Gunakan alamat Account #3 sebagai penerima. Jalankan <code className="bg-slate-100 px-1 rounded">npm run accounts</code> untuk melihat address Account #3.
+            </p>
             <p className="mt-1 text-xs text-slate-500">
               Alamat wallet yang akan menerima dana donasi
             </p>

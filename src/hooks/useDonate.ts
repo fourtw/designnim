@@ -23,6 +23,8 @@ export const useDonate = (onConfirmed?: () => void) => {
     try {
       await donateToContract(fundraiserId, amount)
       toast.success('Transaksi donasi berhasil dikirim!')
+      // Note: Auto-transfer (if target reached) happens in the same transaction
+      // Frontend will detect it when refetching fundraiser data
     } catch (err) {
       console.error(err)
       const errorMessage = err instanceof Error ? err.message : 'Gagal mengirim donasi.'

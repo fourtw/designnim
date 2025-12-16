@@ -224,7 +224,7 @@ export const WalletConnectModal = ({
                           
                           // Wait a bit then reload
                           setTimeout(() => {
-                            window.location.reload()
+                          window.location.reload()
                           }, 1000)
                         }
                       } catch (err: any) {
@@ -232,7 +232,7 @@ export const WalletConnectModal = ({
                         if (err.code === 4001) {
                           alert('Koneksi ditolak. Silakan approve di MetaMask.')
                         } else {
-                          alert('Gagal connect MetaMask. Pastikan extension sudah unlock dan refresh halaman.')
+                        alert('Gagal connect MetaMask. Pastikan extension sudah unlock dan refresh halaman.')
                         }
                       }
                     }}

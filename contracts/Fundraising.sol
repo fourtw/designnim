@@ -137,6 +137,7 @@ contract Fundraising {
     /**
      * @dev Make a donation to a fundraiser
      * @param _fundraiserId ID of the fundraiser
+     * @notice Automatically transfers funds to recipient when target is reached
      */
     function donate(uint256 _fundraiserId) external payable validFundraiser(_fundraiserId) {
         Fundraiser storage fundraiser = fundraisers[_fundraiserId];
@@ -154,6 +155,21 @@ contract Fundraising {
         }));
 
         emit DonationMade(_fundraiserId, msg.sender, msg.value, block.timestamp);
+
+        // Auto-transfer to recipient if target is reached
+        if (fundraiser.raisedAmount >= fundraiser.targetAmount) {
+            uint256 amountToTransfer = fundraiser.raisedAmount;
+            address recipient = fundraiser.recipient;
+            
+            // Reset raised amount to prevent reentrancy
+            fundraiser.raisedAmount = 0;
+            
+            // Transfer funds to recipient
+            (bool success, ) = payable(recipient).call{value: amountToTransfer}("");
+            require(success, "Auto-transfer failed");
+            
+            emit FundsWithdrawn(_fundraiserId, recipient, amountToTransfer);
+        }
     }
 
     /**

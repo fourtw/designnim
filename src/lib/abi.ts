@@ -105,7 +105,7 @@ export const fundraisingAbi = [
         type: 'tuple[]',
         components: [
           { name: 'donor', type: 'address' },
-          { name: 'amount', type: 'uint256' },
+      { name: 'amount', type: 'uint256' },
           { name: 'timestamp', type: 'uint256' },
           { name: 'fundraiserId', type: 'uint256' },
         ],

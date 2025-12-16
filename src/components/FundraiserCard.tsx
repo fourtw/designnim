@@ -34,9 +34,9 @@ export const FundraiserCard = ({ fundraiser, onSelect }: Props) => {
           {fundraiser.description}
         </p>
         {fundraiser.impactFocus && (
-          <p className="mt-3 text-xs font-semibold text-brand-dark uppercase tracking-wide">
-            Fokus: {fundraiser.impactFocus}
-          </p>
+        <p className="mt-3 text-xs font-semibold text-brand-dark uppercase tracking-wide">
+          Fokus: {fundraiser.impactFocus}
+        </p>
         )}
 
         <div className="mt-4">

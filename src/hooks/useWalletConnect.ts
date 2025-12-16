@@ -151,13 +151,13 @@ export const useWalletConnect = () => {
               : errorMessage
           )
         }
-      }
-      
-      throw new Error(
+        }
+        
+        throw new Error(
         errorMessage.includes('not found') || errorMessage.includes('not ready')
           ? 'MetaMask belum terdeteksi. Pastikan extension sudah aktif dan unlock, lalu refresh halaman.'
           : errorMessage
-      )
+        )
     }
   }
 
